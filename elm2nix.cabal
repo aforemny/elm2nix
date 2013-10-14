@@ -1,16 +1,16 @@
-Name: elm2nix
-Version: 0.0.0.0
-License: BSD3
-License-File: LICENSE
-Author: Alexander Foremny <alexanderforemny@gmail.com>
-Maintainer: Alexander Foremny <alexanderforemny@gmail.com>
-Homepage: http://github.com/aforemny/elm2nix
-Category: Distribution
-Synopsis: Convert Elm buil.json files into Nix build instructions
-Cabal-Version: >= 1.8
-Build-Type: Custom
-Tested-With: GHC >= 6.12.3 && <= 7.6.3
-Data-files: README.md
+Name:           elm2nix
+Version:        0.0.0.0
+License:        BSD3
+License-File:   LICENSE
+Author:         Alexander Foremny <alexanderforemny@gmail.com>
+Maintainer:     Alexander Foremny <alexanderforemny@gmail.com>
+Homepage:       http://github.com/aforemny/elm2nix
+Category:       Distribution
+Synopsis:       Convert Elm buil.json files into Nix build instructions
+Cabal-Version:  >= 1.8
+Build-Type:     Custom
+Tested-With:    GHC >= 6.12.3 && <= 7.6.3
+Data-files:     README.md
 Description:
   Foo description
   bar description

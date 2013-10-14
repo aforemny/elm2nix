@@ -27,7 +27,7 @@ data Build = Build
 instance FromJSON Build where
     parseJSON (Object v)
       = Build <$> v .: "name"
-              <*> v .: "version"
+              <*> ((show :: Float -> String) <$> (v .: "version"))
               <*> v .: "description"
               <*> v .: "license"
               <*> v .: "author"
@@ -44,7 +44,7 @@ elm2nix b
   = let
         fmt  = unlines [ "{ elm, fetchgit%s }:"
                        , ""
-                       , "elm.mkDerivation {"
+                       , "elm.mkDerivation (self : {"
                        , "  name = \"%s\";"
                        , "  version = \"%s\";"
                        , "  src = fetchgit {"
@@ -52,10 +52,11 @@ elm2nix b
                        , "    rev = \"%s\";"
                        , "  };"
                        , "  buildDepends = [ %s ];"
-                       , "}" ]
+                       , "})" ]
 
         args | null deps = ""
              | otherwise = intercalate ", " ([]:deps)
+
         nam  = name b
         ver  = version b
         url  = repository b
@@ -63,10 +64,14 @@ elm2nix b
         inps = intercalate " " deps
 
         deps :: [String]
-        deps = map mkAttr (dependencies b)
+        deps = map mkName (dependencies b)
 
-        mkAttr ((Central s), v)   = printf "\"%s%s\"" s (mkVer v)
-        mkAttr ((GitHub  s t), v) = printf "\"%s\".\"%s%s\"" s t (mkVer v)
+        mkName :: (Source, String) -> String
+        mkName ((Central s),   v) = printf "%s%s" s (mkVer v)
+        mkName ((GitHub  _ t), v) = printf "%s%s" t (mkVer v)
+
+        -- mkAttr ((Central s),   v) = printf "%s%s"    s   (mkVer v)
+        -- mkAttr ((GitHub  s t), v) = printf "%s.%s%s" s t (mkVer v)
 
         mkVer "*"      = mkVer "master"
         mkVer "master" = ""
@@ -96,10 +101,11 @@ main = do
   args <- getArgs
   case args of
       [fn] -> do
-          result <- decode <$> B.readFile fn
+          result <- eitherDecode <$> B.readFile fn
           case result of
-              Just b  -> do putStrLn (elm2nix b)
-                            exitWith ExitSuccess
-              Nothing -> exitWith (ExitFailure 1)
-      _    -> putStrLn "elm2nix build.json > default.nix"
+              Right b  -> do putStrLn (elm2nix b)
+                             exitWith ExitSuccess
+              Left es  -> do print es
+                             exitWith (ExitFailure 1)
+      _    -> putStrLn "elm2nix elm_dependencies.json > default.nix"
 
